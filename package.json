@@ -1,7 +1,7 @@
 
 {
   "name": "project-flame",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Project Flame Game Launcher",
   "main": "main.js",
   "scripts": {
