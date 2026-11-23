@@ -426,21 +426,6 @@ body {
     </div>
 <!-- USERNAME DISPLAY -->
 
-    <div class="settings-option">
-      <strong>PROJECT FLAME</strong>
-      <p>Chapter 1 • Season 7</p>
-    </div>
-
-    <div class="settings-option">
-      <strong>APPEARANCE</strong>
-      <p>Icy blue launcher theme</p>
-    </div>
-
-    <div class="settings-option">
-      <strong>ACCOUNT</strong>
-      <p>Discord account settings</p>
-    </div>
-
 <div class="settings-option">
   <strong>SOFTWARE UPDATES</strong>
   <p id="updateStatus">Check whether a new version of Project Flame is available.</p>
@@ -457,7 +442,14 @@ body {
     RESTART & INSTALL
   </button>
 </div>
+<div class="settings-option">
+  <strong>ACCOUNT</strong>
+  <p>Log out of your current Discord account.</p>
 
+  <button id="logoutButton" class="update-button">
+    LOG OUT
+  </button>
+</div>
   </div>
 </div>
 
@@ -641,7 +633,25 @@ window.projectFlame.onUpdateStatus((data) => {
     downloadUpdateButton.disabled = false;
   }
 });
+// PROJECT FLAME LOGOUT SYSTEM
 
+const logoutButton = document.getElementById("logoutButton");
+
+logoutButton.addEventListener("click", async () => {
+  logoutButton.disabled = true;
+  logoutButton.textContent = "LOGGING OUT...";
+
+  try {
+    await window.projectFlame.logout();
+
+    location.reload();
+  } catch (error) {
+    logoutButton.disabled = false;
+    logoutButton.textContent = "LOG OUT";
+
+    alert("Could not log out. Please try again.");
+  }
+});
 </script>
 </body>
 </html>
