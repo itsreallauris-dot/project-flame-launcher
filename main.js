@@ -322,7 +322,7 @@ ipcMain.handle("download-update", async () => {
   }
 });
 
-// INSTALL UPDATE
+// INSTALL UPDATE SILENTLY
 ipcMain.handle("install-update", () => {
-  autoUpdater.quitAndInstall();
+  autoUpdater.quitAndInstall(true, true);
 });
