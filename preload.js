@@ -1,7 +1,23 @@
+
 const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("projectFlame", {
   discordLogin: () => ipcRenderer.invoke("discord-login"),
   getSession: () => ipcRenderer.invoke("get-session"),
-  logout: () => ipcRenderer.invoke("discord-logout")
+  logout: () => ipcRenderer.invoke("discord-logout"),
+
+  // UPDATE SYSTEM
+  checkForUpdates: () => ipcRenderer.invoke("check-for-updates"),
+  downloadUpdate: () => ipcRenderer.invoke("download-update"),
+  installUpdate: () => ipcRenderer.invoke("install-update"),
+
+  onUpdateStatus: (callback) => {
+    const listener = (_event, data) => callback(data);
+
+    ipcRenderer.on("update-status", listener);
+
+    return () => {
+      ipcRenderer.removeListener("update-status", listener);
+    };
+  }
 });

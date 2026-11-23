@@ -10,10 +10,10 @@ const path = require("path");
 const fs = require("fs");
 const http = require("http");
 const crypto = require("crypto");
-
+const { autoUpdater } = require("electron-updater");
 const CLIENT_ID = "1574295793932697651";
 const REDIRECT_URI = "http://127.0.0.1:53682/callback";
-
+let mainWindow = null;
 function createWindow() {
   const imagePath = path.join(__dirname, "cover.png");
   const htmlPath = path.join(__dirname, "index.html");
@@ -41,7 +41,7 @@ const win = new BrowserWindow({
       contextIsolation: true
     }
 });
-
+mainWindow = win;
   win.loadFile(htmlPath);
 
   win.webContents.setWindowOpenHandler(({ url }) => {
@@ -251,4 +251,78 @@ app.whenReady().then(createWindow);
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();
+});
+// PROJECT FLAME AUTO UPDATER
+
+autoUpdater.autoDownload = false;
+autoUpdater.autoInstallOnAppQuit = true;
+
+function sendUpdateStatus(status, data = {}) {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send("update-status", {
+      status,
+      ...data
+    });
+  }
+}
+
+autoUpdater.on("checking-for-update", () => {
+  sendUpdateStatus("checking");
+});
+
+autoUpdater.on("update-available", (info) => {
+  sendUpdateStatus("available", {
+    version: info.version
+  });
+});
+
+autoUpdater.on("update-not-available", () => {
+  sendUpdateStatus("not-available");
+});
+
+autoUpdater.on("download-progress", (progress) => {
+  sendUpdateStatus("downloading", {
+    percent: Math.round(progress.percent)
+  });
+});
+
+autoUpdater.on("update-downloaded", (info) => {
+  sendUpdateStatus("downloaded", {
+    version: info.version
+  });
+});
+
+autoUpdater.on("error", (error) => {
+  sendUpdateStatus("error", {
+    message: error.message
+  });
+});
+
+// CHECK FOR UPDATES
+ipcMain.handle("check-for-updates", async () => {
+  try {
+    await autoUpdater.checkForUpdates();
+    return true;
+  } catch (error) {
+    return {
+      error: error.message
+    };
+  }
+});
+
+// DOWNLOAD UPDATE
+ipcMain.handle("download-update", async () => {
+  try {
+    await autoUpdater.downloadUpdate();
+    return true;
+  } catch (error) {
+    return {
+      error: error.message
+    };
+  }
+});
+
+// INSTALL UPDATE
+ipcMain.handle("install-update", () => {
+  autoUpdater.quitAndInstall();
 });

@@ -12,11 +12,13 @@
   "author": "Project Flame",
   "license": "ISC",
   "type": "commonjs",
-"dependencies": {},
-"devDependencies": {
-  "electron": "^45.4.1",
-  "electron-builder": "^26.0.12"
-},
+  "dependencies": {
+    "electron-updater": "^6.8.11"
+  },
+  "devDependencies": {
+    "electron": "^45.4.1",
+    "electron-builder": "^26.0.12"
+  },
   "build": {
     "appId": "com.projectflame.launcher",
     "productName": "Project Flame",
@@ -32,6 +34,11 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "Project Flame"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "itsreallauris-dot",
+      "repo": "project-flame-launcher"
     }
   }
 }
