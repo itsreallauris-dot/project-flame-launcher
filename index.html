@@ -299,6 +299,23 @@ body {
   border-radius: 7px;
   color: #d8f2ff;
 }
+.update-button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 12px;
+  background: linear-gradient(90deg, #ff4500, #ff8800);
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.update-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 15px #ff8800;
+}
 /* USERNAME BOX */
 .username-box {
   position: fixed;
@@ -424,6 +441,23 @@ body {
       <p>Discord account settings</p>
     </div>
 
+<div class="settings-option">
+  <strong>SOFTWARE UPDATES</strong>
+  <p id="updateStatus">Check whether a new version of Project Flame is available.</p>
+
+  <button id="checkUpdatesButton" class="update-button">
+    CHECK FOR UPDATES
+  </button>
+
+  <button id="downloadUpdateButton" class="update-button" style="display:none;">
+    DOWNLOAD UPDATE
+  </button>
+
+  <button id="installUpdateButton" class="update-button" style="display:none;">
+    RESTART & INSTALL
+  </button>
+</div>
+
   </div>
 </div>
 
@@ -532,6 +566,79 @@ closeSettings.addEventListener("click", () => {
 settingsOverlay.addEventListener("click", (event) => {
   if (event.target === settingsOverlay) {
     settingsOverlay.style.display = "none";
+  }
+});
+
+// PROJECT FLAME UPDATE SYSTEM
+
+const checkUpdatesButton = document.getElementById("checkUpdatesButton");
+const downloadUpdateButton = document.getElementById("downloadUpdateButton");
+const installUpdateButton = document.getElementById("installUpdateButton");
+const updateStatus = document.getElementById("updateStatus");
+
+// CHECK FOR UPDATES
+checkUpdatesButton.addEventListener("click", async () => {
+  checkUpdatesButton.disabled = true;
+  updateStatus.textContent = "Checking for updates...";
+
+  try {
+    await window.projectFlame.checkForUpdates();
+  } catch (error) {
+    updateStatus.textContent = "Could not check for updates.";
+    checkUpdatesButton.disabled = false;
+  }
+});
+
+// DOWNLOAD UPDATE
+downloadUpdateButton.addEventListener("click", async () => {
+  downloadUpdateButton.disabled = true;
+  updateStatus.textContent = "Starting download...";
+
+  try {
+    await window.projectFlame.downloadUpdate();
+  } catch (error) {
+    updateStatus.textContent = "Download failed. Please try again.";
+    downloadUpdateButton.disabled = false;
+  }
+});
+
+// INSTALL UPDATE
+installUpdateButton.addEventListener("click", () => {
+  updateStatus.textContent = "Restarting Project Flame...";
+  window.projectFlame.installUpdate();
+});
+
+// RECEIVE UPDATE STATUS
+window.projectFlame.onUpdateStatus((data) => {
+  if (data.status === "checking") {
+    updateStatus.textContent = "Checking for updates...";
+  }
+
+  if (data.status === "available") {
+    updateStatus.textContent = "Version " + data.version + " is available!";
+    downloadUpdateButton.style.display = "block";
+    checkUpdatesButton.style.display = "none";
+  }
+
+  if (data.status === "not-available") {
+    updateStatus.textContent = "You're running the latest version of Project Flame!";
+    checkUpdatesButton.disabled = false;
+  }
+
+  if (data.status === "downloading") {
+    updateStatus.textContent = "Downloading update: " + data.percent + "%";
+  }
+
+  if (data.status === "downloaded") {
+    updateStatus.textContent = "Update downloaded! Restart to install.";
+    downloadUpdateButton.style.display = "none";
+    installUpdateButton.style.display = "block";
+  }
+
+  if (data.status === "error") {
+    updateStatus.textContent = "Update error: " + data.message;
+    checkUpdatesButton.disabled = false;
+    downloadUpdateButton.disabled = false;
   }
 });
 
